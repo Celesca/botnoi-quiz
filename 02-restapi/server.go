@@ -31,37 +31,31 @@ type Pokemon struct {
 	}
 }
 
+func fetch(url string, v interface{}) error {
+	response, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(body, v)
+}
+
 func main() {
 	e := echo.New()
 	e.POST("/pokemon/:id", func(c echo.Context) error {
 		id := c.Param("id")
-		response, err := http.Get("https://pokeapi.co/api/v2/pokemon/" + id)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		body, err := io.ReadAll(response.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		var pokemon Pokemon
-		err = json.Unmarshal(body, &pokemon)
+		err := fetch("https://pokeapi.co/api/v2/pokemon/"+id, &pokemon)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		second_response, err := http.Get("https://pokeapi.co/api/v2/pokemon-form/" + id)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		second_body, err := io.ReadAll(second_response.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		err = json.Unmarshal(second_body, &pokemon)
+		err = fetch("https://pokeapi.co/api/v2/pokemon-form/"+id, &pokemon)
 		if err != nil {
 			log.Fatal(err)
 		}
