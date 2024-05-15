@@ -12,6 +12,7 @@ var bot *linebot.Client
 
 func main() {
 	var err error
+
 	channelSecret := "539cf9da750ff5f5ab1e93d5f677d5f4"
 	channelToken := "lvfhMH23GeRN88NQ75GpQb5/k2V9xYs8SDKrsXJlFDAiyR1nt10yuVFtHWZAszy6mSajXcDIwKinoiF6LypjIDZpnpsqO5CzPkW7UvbPMibyf6lb6erMS8L9v7F4X3Fy28YJ7NaCnOGZRnxu4I9VRQdB04t89/1O/w1cDnyilFU="
 
@@ -59,33 +60,53 @@ func handleMessageEvent(event *linebot.Event) {
 func handleTextMessage(replyToken string, message *linebot.TextMessage) {
 	switch message.Text {
 	case "Text":
-		responseMessage := linebot.NewTextMessage("สวัสดีครับ บอท Folk พร้อมให้บริการครับ")
-		_, err := bot.ReplyMessage(replyToken, responseMessage).Do()
-		if err != nil {
-			log.Print(err)
-		}
-
+		responseTextMessage(replyToken, "สวัสดีครับนี่คือข้อความตอบกลับครับ")
 	case "Button":
 		responseButtonTemplate(replyToken)
+	case "Carousel":
+		responseCarouselTemplate(replyToken)
 	default:
+		responseTextMessage(replyToken, "ขออภัยครับ ผมไม่เข้าใจคำถามของคุณ")
 	}
-
 }
 
-func responseCarousel(replyToken string) {
-	imgURL := "https://example.com/bot/images/image.jpg"
-	template := linebot.NewCarouselTemplate()
+func responseTextMessage(replyToken string, message string) {
+	responseMessage := linebot.NewTextMessage(message)
+	_, err := bot.ReplyMessage(replyToken, responseMessage).Do()
+	if err != nil {
+		log.Print(err)
+	}
+}
+
+func responseCarouselTemplate(replyToken string) {
+	var actions []linebot.TemplateAction
+
+	actions = append(actions, linebot.NewMessageAction("ดูเพิ่มเติม", "วันนี้อากาศดี"))
+	actions = append(actions, linebot.NewURIAction("ติดต่อสอบถาม", "https://botnoi.ai/"))
+
+	imgURI := "https://cdn.pixabay.com/photo/2024/04/13/18/22/barberry-8694277_1280.jpg"
+	secondImgURI := "https://cdn.pixabay.com/photo/2022/12/02/21/20/blue-7631674_960_720.jpg"
+
+	var columns []*linebot.CarouselColumn
+
+	columns = append(columns, linebot.NewCarouselColumn(imgURI, "Garden", "lorem ipsum magnito", actions...))
+	columns = append(columns, linebot.NewCarouselColumn(secondImgURI, "Diamond", "lorem ipsum mana", actions...))
+	carousel := linebot.NewCarouselTemplate(columns...)
+	template := linebot.NewTemplateMessage("Carousel", carousel)
+
+	_, err := bot.ReplyMessage(replyToken, template).Do()
+	if err != nil {
+		log.Print(err)
+	}
 }
 
 func responseButtonTemplate(replyToken string) {
 	template := linebot.NewButtonsTemplate(
-		"https://botnoi.ai/assets/etc/botnoi.png", // Thumbnail image URL
-		"Menu",          // Title
-		"Please select", // Text
-		linebot.NewURIAction("View detail", "http://example.com/page/123"),
-		linebot.NewPostbackAction("Buy", "action=buy&itemid=123", "", "", "", ""),
-		linebot.NewPostbackAction("Add to cart", "action=add&itemid=123", "", "", "", ""),
-		linebot.NewURIAction("View detail", "http://example.com/page/123"),
+		"https://cdn.pixabay.com/photo/2024/04/13/18/22/barberry-8694277_1280.jpg",
+		"บริการของบอทน้อย",
+		"โปรดเลือกเมนูที่ต้องการครับ",
+		linebot.NewURIAction("ดูรายละเอียด", "https://botnoi.ai/"),
+		linebot.NewMessageAction("ติดต่อเรา", "ฉันต้องการติดต่อคุณ"),
 	)
 	template.ImageAspectRatio = "rectangle"
 	template.ImageSize = "cover"
@@ -93,7 +114,8 @@ func responseButtonTemplate(replyToken string) {
 
 	message := linebot.NewTemplateMessage("This is a buttons template", template)
 
-	if _, err := bot.ReplyMessage(replyToken, message).Do(); err != nil {
+	_, err := bot.ReplyMessage(replyToken, message).Do()
+	if err != nil {
 		log.Print(err)
 	}
 }
