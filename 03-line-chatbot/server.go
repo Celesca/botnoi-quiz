@@ -70,8 +70,27 @@ func handleTextMessage(replyToken string, message *linebot.TextMessage) {
 	}
 }
 
+func getQuickReplyItems() *linebot.QuickReplyItems {
+	quickReplyItems := []*linebot.QuickReplyButton{
+		linebot.NewQuickReplyButton(
+			"",
+			linebot.NewMessageAction("ดู Text", "Text"),
+		),
+		linebot.NewQuickReplyButton(
+			"",
+			linebot.NewMessageAction("ดู Button", "Button"),
+		),
+		linebot.NewQuickReplyButton(
+			"",
+			linebot.NewMessageAction("ดู Carousel", "Carousel"),
+		),
+	}
+
+	return linebot.NewQuickReplyItems(quickReplyItems...)
+}
+
 func responseTextMessage(replyToken string, message string) {
-	responseMessage := linebot.NewTextMessage(message)
+	responseMessage := linebot.NewTextMessage(message).WithQuickReplies(getQuickReplyItems())
 	_, err := bot.ReplyMessage(replyToken, responseMessage).Do()
 	if err != nil {
 		log.Print(err)
@@ -92,7 +111,7 @@ func responseCarouselTemplate(replyToken string) {
 	columns = append(columns, linebot.NewCarouselColumn(imgURI, "Garden", "lorem ipsum magnito", actions...))
 	columns = append(columns, linebot.NewCarouselColumn(secondImgURI, "Diamond", "lorem ipsum mana", actions...))
 	carousel := linebot.NewCarouselTemplate(columns...)
-	template := linebot.NewTemplateMessage("Carousel", carousel)
+	template := linebot.NewTemplateMessage("Carousel", carousel).WithQuickReplies(getQuickReplyItems())
 
 	_, err := bot.ReplyMessage(replyToken, template).Do()
 	if err != nil {
@@ -112,7 +131,7 @@ func responseButtonTemplate(replyToken string) {
 	template.ImageSize = "cover"
 	template.ImageBackgroundColor = "#FFFFFF"
 
-	message := linebot.NewTemplateMessage("This is a buttons template", template)
+	message := linebot.NewTemplateMessage("This is a buttons template", template).WithQuickReplies(getQuickReplyItems())
 
 	_, err := bot.ReplyMessage(replyToken, message).Do()
 	if err != nil {
