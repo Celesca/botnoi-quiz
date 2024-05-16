@@ -15,5 +15,9 @@
 * ### Features
   - Text Message -> Typing `"Text"` to chatbot
   - Button Template Message -> Typing `"Button"` to chatbot
-  - QuickReply Message -> Typing `"QuickReply"` to chatbot
   - Carousel Template Message -> Typing `"Carousel"` to chatbot
+  - QuickReply Message -> It shows in every message including Text, Button and Carousel
+ 
+---
+
+Sawit Koseeyaumporn
